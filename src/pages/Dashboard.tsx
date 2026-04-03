@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   BarChart3,
-  CheckCircle2,
   Copy,
   Download,
   LayoutDashboard,
@@ -25,6 +24,7 @@ import {
   Settings,
   Star,
   Trash2,
+  User,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -36,6 +36,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import dashboardBg from "@/assets/bg.png";
 
 type Business = {
   id: string;
@@ -73,6 +74,9 @@ export default function Dashboard() {
     "dashboard" | "analytics" | "configuration"
   >("dashboard");
   const [loading, setLoading] = useState(true);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [showBusinessQr, setShowBusinessQr] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -81,6 +85,20 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) fetchData();
   }, [user]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!profileMenuRef.current) return;
+      if (!profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -127,6 +145,40 @@ export default function Dashboard() {
   }).length;
   const activeLinks = reviewLinks.length;
   const latestFeedback = feedbacks.slice(0, 8);
+
+  const now = new Date();
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+  const previousMonthFeedback = feedbacks.filter((item) => {
+    const date = new Date(item.created_at);
+    return date >= previousMonthStart && date <= previousMonthEnd;
+  }).length;
+
+  const feedbackDeltaPercent =
+    previousMonthFeedback === 0
+      ? feedbackThisMonth > 0
+        ? 100
+        : 0
+      : Math.round(
+          ((feedbackThisMonth - previousMonthFeedback) / previousMonthFeedback) *
+            100,
+        );
+
+  const monthlyGoal = Math.max(15, activeLinks * 10 || 15);
+  const monthlyProgress = Math.min(
+    100,
+    Math.round((feedbackThisMonth / monthlyGoal) * 100),
+  );
+
+  const dateRangeLabel = `${currentMonthStart.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  })} - ${now.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  })}, ${now.getFullYear()}`;
 
   const pageTitle =
     activeTab === "dashboard"
@@ -225,16 +277,28 @@ export default function Dashboard() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div
+        className="flex min-h-screen items-center justify-center bg-fixed bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `linear-gradient(rgba(248, 250, 252, 0.45), rgba(248, 250, 252, 0.62)), url(${dashboardBg})`,
+        }}
+      >
+        <div className="rounded-2xl border border-white/85 bg-white/80 px-5 py-4 text-slate-600 shadow-sm backdrop-blur-md">
+          <div className="animate-pulse">Loading dashboard...</div>
+        </div>
       </div>
     );
   }
 
   if (business && !business.subscription_active) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md text-center">
+      <div
+        className="flex min-h-screen items-center justify-center bg-fixed bg-cover bg-center bg-no-repeat px-4"
+        style={{
+          backgroundImage: `linear-gradient(rgba(248, 250, 252, 0.45), rgba(248, 250, 252, 0.62)), url(${dashboardBg})`,
+        }}
+      >
+        <Card className="w-full max-w-md border border-white/90 bg-white/85 text-center shadow-xl backdrop-blur-md">
           <CardHeader>
             <CardTitle>Subscription Inactive</CardTitle>
             <CardDescription>
@@ -247,12 +311,17 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-950">
+    <div
+      className="min-h-screen bg-fixed bg-cover bg-center bg-no-repeat text-slate-950"
+      style={{
+        backgroundImage: `linear-gradient(rgba(248, 250, 252, 0.42), rgba(248, 250, 252, 0.56)), url(${dashboardBg})`,
+      }}
+    >
       <header className="sticky top-0 z-30 bg-transparent px-4 pt-3 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl rounded-2xl border border-slate-300 bg-white px-4 py-3 shadow-sm">
+        <div className="mx-auto max-w-7xl rounded-[2rem] border border-slate-300/80 bg-slate-100/90 px-4 py-3 shadow-sm backdrop-blur-md">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950 text-lg font-bold text-white shadow-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-blue-600 text-lg font-bold text-white shadow-sm">
                 GP
               </div>
               <div>
@@ -265,60 +334,75 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <nav className="flex items-center gap-1 rounded-xl border border-slate-300 bg-slate-100 p-1">
-              <button
-                onClick={() => setActiveTab("dashboard")}
-                className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
-                  activeTab === "dashboard"
-                    ? "bg-slate-950 text-white shadow-sm"
-                    : "text-slate-700 hover:bg-white hover:text-blue-900"
-                }`}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <LayoutDashboard className="h-4 w-4" /> Dashboard
-                </span>
-              </button>
-              <button
-                onClick={() => setActiveTab("analytics")}
-                className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
-                  activeTab === "analytics"
-                    ? "bg-slate-950 text-white shadow-sm"
-                    : "text-slate-700 hover:bg-white hover:text-blue-900"
-                }`}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" /> Analytics
-                </span>
-              </button>
-              <button
-                onClick={() => setActiveTab("configuration")}
-                className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
-                  activeTab === "configuration"
-                    ? "bg-slate-950 text-white shadow-sm"
-                    : "text-slate-700 hover:bg-white hover:text-blue-900"
-                }`}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Settings className="h-4 w-4" /> Configuration
-                </span>
-              </button>
-            </nav>
-
             <div className="ml-auto flex items-center gap-3">
-              <div className="hidden rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 shadow-sm lg:block">
-                {user?.email || "Signed in"}
+              <nav className="flex items-center gap-1 rounded-xl border border-slate-300/80 bg-white/75 p-1 backdrop-blur-sm">
+                <button
+                  onClick={() => setActiveTab("dashboard")}
+                  className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
+                    activeTab === "dashboard"
+                      ? "bg-teal-600 text-white shadow-sm"
+                      : "text-slate-700 hover:bg-white hover:text-teal-700"
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <LayoutDashboard className="h-4 w-4" /> Dashboard
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("analytics")}
+                  className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
+                    activeTab === "analytics"
+                      ? "bg-teal-600 text-white shadow-sm"
+                      : "text-slate-700 hover:bg-white hover:text-teal-700"
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" /> Analytics
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("configuration")}
+                  className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
+                    activeTab === "configuration"
+                      ? "bg-teal-600 text-white shadow-sm"
+                      : "text-slate-700 hover:bg-white hover:text-teal-700"
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Settings className="h-4 w-4" /> Configuration
+                  </span>
+                </button>
+              </nav>
+
+              <div className="relative" ref={profileMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setProfileMenuOpen((prev) => !prev)}
+                  className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-slate-300 bg-white/90 text-slate-700 shadow-sm backdrop-blur-sm transition hover:bg-white"
+                  aria-label="Open profile menu"
+                >
+                  <User className="h-5 w-5" />
+                </button>
+
+                {profileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-60 rounded-xl border border-slate-300/90 bg-white/95 p-3 shadow-lg backdrop-blur-sm">
+                    <div className="mb-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
+                      {user?.email || "Signed in"}
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full border-slate-300 bg-white px-3 text-slate-900 hover:bg-slate-100"
+                      onClick={() => {
+                        signOut();
+                        navigate("/auth");
+                      }}
+                    >
+                      <LogOut className="mr-1 h-4 w-4" />
+                      Logout
+                    </Button>
+                  </div>
+                )}
               </div>
-              <Button
-                variant="outline"
-                className="border-slate-300 bg-white px-3 text-slate-900 hover:bg-slate-100"
-                onClick={() => {
-                  signOut();
-                  navigate("/auth");
-                }}
-              >
-                <LogOut className="mr-1 h-4 w-4" />
-                Logout
-              </Button>
             </div>
           </div>
         </div>
@@ -326,50 +410,162 @@ export default function Dashboard() {
 
       <main className="px-4 pb-10 pt-5 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl space-y-7">
-          <section className="relative overflow-hidden rounded-3xl border border-blue-200 bg-white px-6 py-6 shadow-sm sm:px-8">
-            <div className="relative grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-blue-700">
-                  FeedbackView
-                </p>
-                <h1 className="mt-2 text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">
-                  {pageTitle}
-                </h1>
-                <p className="mt-3 max-w-xl text-lg text-slate-600">
-                  {pageDescription}
-                </p>
-                <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-900">
-                  <span className="h-2 w-2 rounded-full bg-blue-700" />
-                  24 Feb - 12 Mar, 2026
-                </div>
-              </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_1fr]">
+            <section className="relative overflow-hidden rounded-3xl border-2 border-slate-400/80 bg-gradient-to-br from-white/90 to-slate-50/80 px-6 py-6 shadow-sm backdrop-blur-md sm:px-8">
+              <div className="relative grid gap-8 lg:grid-cols-[1.15fr_1fr] lg:items-start">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.34em] text-blue-700">
+                    FeedbackView
+                  </p>
+                  <h1 className="mt-2 text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">
+                    {pageTitle}
+                  </h1>
+                  <p className="mt-3 max-w-xl text-lg text-slate-600">
+                    {pageDescription}
+                  </p>
+                  <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-teal-300 bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-800">
+                    <span className="h-2 w-2 rounded-full bg-teal-600" />
+                    {dateRangeLabel}
+                  </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    Total
-                  </p>
-                  <p className="mt-2 text-3xl font-bold text-slate-900">
-                    {totalFeedback}
-                  </p>
+                  <div className="mt-4 max-w-xl rounded-xl border border-slate-300/80 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-sm">
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                      <span>Monthly Goal</span>
+                      <span>
+                        {feedbackThisMonth} / {monthlyGoal}
+                      </span>
+                    </div>
+                    <div className="mt-2 h-2 rounded-full bg-slate-200">
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-teal-600 to-blue-600"
+                        style={{ width: `${monthlyProgress}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-2xl border border-slate-900 bg-slate-900 p-4 text-center text-white shadow-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-300">
-                    This Month
-                  </p>
-                  <p className="mt-2 text-3xl font-bold">{feedbackThisMonth}</p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    Platforms
-                  </p>
-                  <p className="mt-2 text-3xl font-bold text-slate-900">
-                    {activeLinks}
-                  </p>
+
+                <div className="w-full space-y-3 lg:self-start">
+                  <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="flex min-h-[164px] w-full flex-col items-center justify-center rounded-2xl border-2 border-slate-300 bg-white/90 p-4 text-center shadow-sm backdrop-blur-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                        Total
+                      </p>
+                      <p className="mt-2 text-3xl font-bold text-slate-900">
+                        {totalFeedback}
+                      </p>
+                    </div>
+                    <div className="flex min-h-[164px] w-full flex-col items-center justify-center rounded-2xl border-2 border-slate-800 bg-gradient-to-br from-teal-600 to-blue-600 p-4 text-center text-white shadow-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-100">
+                        This Month
+                      </p>
+                      <p className="mt-2 text-3xl font-bold">{feedbackThisMonth}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-slate-300/80 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-sm">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Average Rating
+                      </p>
+                      <p className="mt-1 text-xl font-bold text-slate-900">
+                        {averageRatingText}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-slate-300/80 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-sm">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Monthly Trend
+                      </p>
+                      <p className="mt-1 text-xl font-bold text-slate-900">
+                        {feedbackDeltaPercent > 0 ? "+" : ""}
+                        {feedbackDeltaPercent}%
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+
+            <Card className="glass-card glass-card-hover h-full border-2 border-slate-400/80">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">
+                  {showBusinessQr ? "Business QR" : "Business Info"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {!showBusinessQr && (
+                  <>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Name
+                      </p>
+                      <p className="truncate text-base font-bold text-slate-900">
+                        {business?.name || "Not Set"}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Status
+                      </p>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          business?.subscription_active
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {business?.subscription_active ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Links
+                      </p>
+                      <p className="text-base font-bold text-slate-900">{activeLinks}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        Feedback
+                      </p>
+                      <p className="text-base font-bold text-slate-900">{totalFeedback}</p>
+                    </div>
+                  </>
+                )}
+
+                {!showBusinessQr && (
+                  <div className="pt-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full border-slate-300 bg-white/85 text-slate-800 hover:bg-white"
+                      onClick={() => setShowBusinessQr(true)}
+                    >
+                      Show QR
+                    </Button>
+                  </div>
+                )}
+
+                {showBusinessQr && (
+                  <div className="space-y-3">
+                    <div className="flex justify-center rounded-xl border border-slate-200 bg-white/85 p-3">
+                      {reviewUrl ? (
+                        <QRCodeSVG value={reviewUrl} size={112} />
+                      ) : (
+                        <p className="text-xs font-medium text-slate-500">No review link yet</p>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full border-slate-300 bg-white/85 text-slate-800 hover:bg-white"
+                      onClick={() => setShowBusinessQr(false)}
+                    >
+                      Show Info
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           {activeTab === "dashboard" && (
             <>
@@ -435,11 +631,11 @@ export default function Dashboard() {
                           {totalFeedback}
                         </p>
                       </div>
-                      <div className="rounded-lg border border-slate-200 bg-white px-2 py-2">
+                      <div className="rounded-lg border border-teal-200 bg-teal-50 px-2 py-2">
                         <p className="text-[10px] uppercase tracking-[0.12em] text-slate-500">
                           Month
                         </p>
-                        <p className="text-sm font-bold text-slate-900">
+                        <p className="text-sm font-bold text-teal-700">
                           {feedbackThisMonth}
                         </p>
                       </div>
@@ -485,7 +681,7 @@ export default function Dashboard() {
               </div>
 
               <div className="grid grid-cols-1 gap-6">
-                <Card className="glass-card glass-card-hover">
+                <Card className="glass-card glass-card-hover border-2 border-slate-400/80">
                   <CardHeader>
                     <CardTitle className="text-lg">Latest Feedback</CardTitle>
                     <CardDescription>
@@ -501,7 +697,7 @@ export default function Dashboard() {
                       latestFeedback.map((fb) => (
                         <div
                           key={fb.id}
-                          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                          className="rounded-xl border border-white/90 bg-white/85 p-4 shadow-sm backdrop-blur-sm"
                         >
                           <div className="mb-2 flex items-center justify-between">
                             <div className="flex items-center gap-1">
@@ -530,46 +726,8 @@ export default function Dashboard() {
                 </Card>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6">
                 <Card className="glass-card glass-card-hover">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Business Info</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                        Business Name
-                      </p>
-                      <p className="mt-1 text-xl font-bold text-gray-900">
-                        {business?.name || "Not Set"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                        Status
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        {business?.subscription_active ? (
-                          <>
-                            <CheckCircle2 className="h-5 w-5 text-green-500" />
-                            <span className="text-sm font-semibold text-green-600">
-                              Active
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="h-5 w-5 text-red-500">X</span>
-                            <span className="text-sm font-semibold text-red-600">
-                              Inactive
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="glass-card glass-card-hover lg:col-span-2">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Link className="h-5 w-5 text-blue-600" />
@@ -591,7 +749,7 @@ export default function Dashboard() {
                         {reviewLinks.map((link) => (
                           <div
                             key={link.id}
-                            className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3 transition hover:bg-gray-100"
+                            className="flex items-center justify-between rounded-lg border border-slate-200/90 bg-white/75 p-3 transition hover:bg-white"
                           >
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-semibold text-gray-900">
@@ -725,7 +883,7 @@ export default function Dashboard() {
                   <CardTitle>Usage Statistics</CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-4 md:grid-cols-3">
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="rounded-lg border border-slate-200/90 bg-white/75 p-4">
                     <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                       Team
                     </p>
@@ -736,7 +894,7 @@ export default function Dashboard() {
                       Scale to 10 seats on current plan
                     </p>
                   </div>
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="rounded-lg border border-slate-200/90 bg-white/75 p-4">
                     <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                       Integrations
                     </p>
@@ -747,7 +905,7 @@ export default function Dashboard() {
                       Review platforms connected
                     </p>
                   </div>
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="rounded-lg border border-slate-200/90 bg-white/75 p-4">
                     <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                       Feedback
                     </p>
@@ -780,7 +938,7 @@ export default function Dashboard() {
                         value={businessName}
                         onChange={(e) => setBusinessName(e.target.value)}
                         placeholder="Your Business Name"
-                        className="bg-white"
+                        className="border-slate-200 bg-white/85"
                       />
                       <Button
                         onClick={updateBusinessName}
@@ -794,14 +952,18 @@ export default function Dashboard() {
                   <div className="space-y-2">
                     <Label>Review Link</Label>
                     <div className="flex gap-2">
-                      <Input value={reviewUrl} readOnly className="bg-white" />
+                      <Input
+                        value={reviewUrl}
+                        readOnly
+                        className="border-slate-200 bg-white/85"
+                      />
                       <Button variant="outline" size="icon" onClick={copyLink}>
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="flex flex-col items-center gap-3 rounded-lg border border-slate-200/90 bg-white/75 p-4">
                     <p className="text-sm font-semibold text-gray-700">
                       Download QR Code
                     </p>
@@ -835,7 +997,7 @@ export default function Dashboard() {
                     {reviewLinks.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition hover:bg-gray-100"
+                        className="flex items-center justify-between rounded-lg border border-slate-200/90 bg-white/75 px-3 py-2 transition hover:bg-white"
                       >
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-gray-900">
@@ -863,13 +1025,13 @@ export default function Dashboard() {
                         placeholder="Platform name"
                         value={newPlatform}
                         onChange={(e) => setNewPlatform(e.target.value)}
-                        className="bg-white"
+                        className="border-slate-200 bg-white/85"
                       />
                       <Input
                         placeholder="Platform URL"
                         value={newUrl}
                         onChange={(e) => setNewUrl(e.target.value)}
-                        className="bg-white"
+                        className="border-slate-200 bg-white/85"
                       />
                       <Button
                         onClick={addReviewLink}

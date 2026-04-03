@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Zap } from "lucide-react";
+import { ArrowLeft, Zap } from "lucide-react";
+import dashboardBg from "@/assets/bg.png";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -48,8 +49,21 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+    <div
+      className="relative flex min-h-screen items-center justify-center bg-fixed bg-cover bg-center bg-no-repeat px-4 py-16"
+      style={{
+        backgroundImage: `linear-gradient(rgba(248, 250, 252, 0.45), rgba(248, 250, 252, 0.62)), url(${dashboardBg})`,
+      }}
+    >
+      <Link
+        to="/"
+        className="absolute left-4 top-5 inline-flex items-center gap-2 rounded-xl border border-white/80 bg-white/85 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white sm:left-8"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Home
+      </Link>
+
+      <Card className="w-full max-w-md border border-white/90 bg-white/88 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.5)] backdrop-blur-xl">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Zap className="h-8 w-8 text-primary" />
@@ -65,6 +79,11 @@ export default function Auth() {
               ? "Sign in to manage your reviews"
               : "Start collecting customer feedback"}
           </CardDescription>
+          <p className="mt-2 text-xs text-slate-500">
+            {
+              "Create account -> get QR code -> collect feedback -> grow faster."
+            }
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -91,7 +110,11 @@ export default function Auth() {
                 minLength={6}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full rounded-xl bg-teal-600 text-white hover:bg-teal-700"
+              disabled={loading}
+            >
               {loading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
             </Button>
           </form>

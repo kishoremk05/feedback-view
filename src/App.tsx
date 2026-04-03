@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import ReviewPage from "./pages/ReviewPage";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import InfoPage from "./pages/InfoPage";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,18 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/review/:businessId" element={<ReviewPage />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/features" element={<InfoPage pageKey="features" />} />
+            <Route path="/pricing" element={<InfoPage pageKey="pricing" />} />
+            <Route
+              path="/success-stories"
+              element={<InfoPage pageKey="success-stories" />}
+            />
+            <Route path="/about" element={<InfoPage pageKey="about" />} />
+            <Route path="/blog" element={<InfoPage pageKey="blog" />} />
+            <Route path="/contact" element={<InfoPage pageKey="contact" />} />
+            <Route path="/privacy" element={<InfoPage pageKey="privacy" />} />
+            <Route path="/terms" element={<InfoPage pageKey="terms" />} />
+            <Route path="/security" element={<InfoPage pageKey="security" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

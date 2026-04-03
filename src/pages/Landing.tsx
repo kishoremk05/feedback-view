@@ -1,8 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Star,
-  ArrowRight,
   CheckCircle,
   BarChart3,
   MessageCircle,
@@ -21,6 +21,7 @@ import {
   Briefcase,
   Zap as ZapIcon,
 } from "lucide-react";
+import dashboardBg from "@/assets/bg.png";
 
 const features = [
   {
@@ -55,13 +56,63 @@ const features = [
   },
 ];
 
-const integrations = [
-  { name: "Google", icon: Search },
-  { name: "Facebook", icon: Smartphone },
-  { name: "Yelp", icon: Star },
-  { name: "Trustpilot", icon: Check },
-  { name: "TripAdvisor", icon: Plane },
-  { name: "Amazon", icon: Package },
+const testimonials = [
+  {
+    name: "Sarah Johnson",
+    role: "Restaurant Owner",
+    icon: Briefcase,
+    text: "FeedbackView helped us increase Google rating from 3.2 to 4.8 in 3 months!",
+    rating: 5,
+  },
+  {
+    name: "Michael Chen",
+    role: "E-commerce Manager",
+    icon: Package,
+    text: "The automated review requests are a game-changer. We get 5x more reviews now.",
+    rating: 5,
+  },
+  {
+    name: "Emma Williams",
+    role: "Marketing Director",
+    icon: BarChart3,
+    text: "Best investment we made this year. The analytics alone are worth it.",
+    rating: 5,
+  },
+  {
+    name: "David Patel",
+    role: "Clinic Manager",
+    icon: Shield,
+    text: "Negative feedback alerts helped our team resolve issues before they escalated.",
+    rating: 5,
+  },
+  {
+    name: "Olivia Brown",
+    role: "Salon Founder",
+    icon: User,
+    text: "Customers love scanning our QR at checkout. Reviews started coming in daily.",
+    rating: 5,
+  },
+  {
+    name: "Noah Garcia",
+    role: "Hotel Operations Lead",
+    icon: Search,
+    text: "We used insights to improve weak areas and saw measurable growth in bookings.",
+    rating: 5,
+  },
+  {
+    name: "Ava Thompson",
+    role: "Retail Owner",
+    icon: Check,
+    text: "Setup was easy and the team adopted it in one day. Highly recommended.",
+    rating: 5,
+  },
+  {
+    name: "James Wilson",
+    role: "Multi-Location Director",
+    icon: Plane,
+    text: "Managing reviews across branches is finally simple and consistent.",
+    rating: 5,
+  },
 ];
 
 const pricingPlans = [
@@ -109,72 +160,207 @@ const faqs = [
     a: "Setup takes less than 5 minutes. Just connect your review platforms and start collecting feedback.",
   },
   {
-    q: "Can I import existing reviews?",
-    a: "Yes! We can import your existing reviews from Google, Yelp, Facebook, and other platforms.",
+    q: "How do customers submit feedback with QR code?",
+    a: "After signup, you get a unique QR code for your business. Customers scan it and submit feedback instantly from their phone.",
+  },
+  {
+    q: "Can I collect both private feedback and public reviews?",
+    a: "Yes. You can collect private sentiment first, then direct happy customers to public review platforms to boost your rating.",
+  },
+  {
+    q: "How does FeedbackView help with business growth?",
+    a: "Our insights show patterns in customer sentiment, service gaps, and strengths so you can improve operations and increase repeat business.",
+  },
+  {
+    q: "Can I manage multiple business locations?",
+    a: "Absolutely. Professional and Enterprise plans support multiple locations with centralized reporting and tracking.",
   },
   {
     q: "Is there a contract or hidden fees?",
-    a: "No contracts, no hidden fees. Cancel anytime. We believe in transparency.",
+    a: "No contracts and no hidden fees. You can upgrade, downgrade, or cancel anytime.",
   },
   {
-    q: "What's included in the free trial?",
-    a: "Full access to all Professional features for 14 days. No credit card required.",
+    q: "Do you offer onboarding support?",
+    a: "Yes. We provide setup guidance, best-practice templates, and support to help your team launch quickly.",
+  },
+  {
+    q: "What is included in the free trial?",
+    a: "You get full access to Professional features for 14 days with no credit card required.",
   },
 ];
 
+const feedbackPlanItems = [
+  {
+    title: "Follow-up with recent 3-star customers",
+    detail: "Send recovery message template and offer support callback.",
+    status: "done",
+  },
+  {
+    title: "Publish top testimonial to homepage",
+    detail: "Highlight highest sentiment feedback in hero social proof block.",
+    status: "done",
+  },
+  {
+    title: "Route low-rating alerts to support",
+    detail: "Trigger instant notification to support lead for ratings <= 2.",
+    status: "done",
+  },
+  {
+    title: "Launch weekend review reminder",
+    detail: "Schedule WhatsApp and email reminders for inactive customers.",
+    status: "done",
+  },
+  {
+    title: "Tag feedback by location cluster",
+    detail: "Separate reviews by branch to spot location-level issues quickly.",
+    status: "next",
+  },
+  {
+    title: "A/B test response templates",
+    detail: "Compare concise vs empathetic tone across negative feedback.",
+    status: "next",
+  },
+] as const;
+
+const featureFlowLaneStyles = [
+  { bar: "bg-[#f5d9be]", dot: "bg-[#c3895d]" },
+  { bar: "bg-[#d8c5f4]", dot: "bg-[#8065ba]" },
+  { bar: "bg-[#bbcff8]", dot: "bg-[#5f7bc8]" },
+];
+
 export default function Landing() {
+  const [isNavCompact, setIsNavCompact] = useState(false);
+
+  const totalFeedbackTasks = feedbackPlanItems.length;
+  const completedFeedbackTasks = feedbackPlanItems.filter(
+    (item) => item.status === "done",
+  ).length;
+  const nextFeedbackTasks = totalFeedbackTasks - completedFeedbackTasks;
+  const feedbackExecutionProgress = Math.round(
+    (completedFeedbackTasks / totalFeedbackTasks) * 100,
+  );
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const y = window.scrollY;
+      setIsNavCompact((prev) => {
+        if (y > 80) return true;
+        if (y < 20) return false;
+        return prev;
+      });
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const revealElements = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-reveal]"),
+    );
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      revealElements.forEach((element) => element.classList.add("is-revealed"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const element = entry.target as HTMLElement;
+            const delay = Number(element.dataset.delay || 0);
+
+            window.setTimeout(() => {
+              element.classList.add("is-revealed");
+            }, delay);
+
+            observer.unobserve(element);
+          }
+        });
+      },
+      {
+        threshold: 0.18,
+        rootMargin: "0px 0px -8% 0px",
+      },
+    );
+
+    revealElements.forEach((element) => observer.observe(element));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div
+      className="min-h-screen bg-fixed bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `linear-gradient(rgba(248, 250, 252, 0.42), rgba(248, 250, 252, 0.56)), url(${dashboardBg})`,
+      }}
+    >
       {/* Navigation */}
-      <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 bg-gradient-to-br from-teal-600 to-blue-600 rounded-lg flex items-center justify-center">
-              <BookmarkIcon className="h-5 w-5 text-white" />
+      <nav className="sticky top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
+        <div
+          className={`mx-auto rounded-[2.2rem] border border-slate-300/80 bg-slate-100/90 px-4 shadow-sm backdrop-blur-md transition-[max-width,padding] duration-300 ease-out sm:px-6 ${
+            isNavCompact ? "max-w-5xl py-2.5" : "max-w-7xl py-3"
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2.5 shrink-0">
+              <BookmarkIcon className="h-6 w-6 text-slate-900" />
+              <span className="text-2xl font-bold text-slate-900">
+                FeedbackView
+              </span>
             </div>
-            <span className="text-xl font-bold text-gray-900">
-              ReviewMaster
-            </span>
-          </div>
 
-          <div className="hidden md:flex items-center gap-8">
-            <a
-              href="#features"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Features
-            </a>
-            <a
-              href="#pricing"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Pricing
-            </a>
-            <a
-              href="#integrations"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Integrations
-            </a>
-            <a
-              href="#resources"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Resources
-            </a>
-          </div>
+            <div className="hidden flex-1 items-center justify-center gap-8 md:flex">
+              <a
+                href="#features"
+                className="text-base font-semibold text-slate-700 transition-colors hover:text-slate-950"
+              >
+                Features
+              </a>
+              <a
+                href="#pricing"
+                className="text-base font-semibold text-slate-700 transition-colors hover:text-slate-950"
+              >
+                Pricing
+              </a>
+              <a
+                href="#stories"
+                className="text-base font-semibold text-slate-700 transition-colors hover:text-slate-950"
+              >
+                Success
+              </a>
+              <a
+                href="#resources"
+                className="text-base font-semibold text-slate-700 transition-colors hover:text-slate-950"
+              >
+                Resources
+              </a>
+            </div>
 
-          <div className="flex items-center gap-3">
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="border-gray-300">
+            <div className="ml-auto flex items-center gap-2 sm:gap-3">
+              <Link
+                to="/auth"
+                className="hidden text-base font-semibold text-slate-700 transition-colors hover:text-slate-950 sm:inline"
+              >
                 Login
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
-                Sign Up
-              </Button>
-            </Link>
+              </Link>
+              <Link to="/auth">
+                <Button
+                  size="sm"
+                  className="rounded-2xl border-2 border-white bg-[#238f93] px-7 py-2 text-sm font-bold text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.55)] transition-all hover:bg-[#1e7e82] sm:px-9"
+                >
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -183,7 +369,11 @@ export default function Landing() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
-          <div className="space-y-8">
+          <div
+            className="space-y-8 reveal-on-scroll"
+            data-reveal
+            data-delay="60"
+          >
             <div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4">
                 Master Your Business Reputation. Turn Customer{" "}
@@ -199,22 +389,13 @@ export default function Landing() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="pt-4">
               <Link to="/auth">
                 <Button
                   size="lg"
-                  className="bg-teal-600 hover:bg-teal-700 text-white px-8 text-base"
+                  className="bg-teal-600 hover:bg-teal-700 text-white px-8 text-base transition-transform duration-300 hover:-translate-y-0.5"
                 >
-                  Start Your Free 14-Day Trial
-                </Button>
-              </Link>
-              <Link to="/auth">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-gray-300 px-8 text-base"
-                >
-                  Schedule a Demo
+                  Boost Your Growth
                 </Button>
               </Link>
             </div>
@@ -234,7 +415,11 @@ export default function Landing() {
           </div>
 
           {/* Right - Dashboard Mockup with Custom Illustration */}
-          <div className="relative">
+          <div
+            className="relative reveal-on-scroll motion-float-soft"
+            data-reveal
+            data-delay="180"
+          >
             <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
               {/* Window Header */}
               <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-6 py-4 flex items-center gap-2">
@@ -391,7 +576,7 @@ export default function Landing() {
         className="py-20 bg-gradient-to-b from-gray-50 to-white border-t border-gray-200"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div className="text-center mb-20 reveal-on-scroll" data-reveal>
             <p className="text-teal-600 font-semibold text-sm uppercase mb-2 tracking-wide">
               Powerful Features
             </p>
@@ -403,37 +588,190 @@ export default function Landing() {
               leverage customer reviews.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f, i) => (
-              <div key={i} className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-600 to-blue-600 rounded-2xl blur opacity-0 group-hover:opacity-20 transition duration-300"></div>
-                <div className="relative h-full p-8 bg-white border border-gray-200 rounded-2xl hover:border-teal-300 transition-all duration-300 hover:shadow-xl">
-                  <div className="mb-6 inline-flex p-3 bg-gradient-to-br from-teal-100 to-blue-100 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <f.icon className="h-6 w-6 text-teal-600" />
+          <div
+            className="relative hidden lg:block reveal-on-scroll"
+            data-reveal
+            data-delay="80"
+          >
+            <div className="relative overflow-hidden rounded-[2.1rem] border border-slate-200/80 bg-gradient-to-br from-[#eff7f5] via-[#edf4fb] to-[#eef7ff] p-8 shadow-[0_24px_65px_rgba(15,23,42,0.08)]">
+              <div className="pointer-events-none absolute -left-16 top-10 h-52 w-52 rounded-full bg-[#b6e7df]/40 blur-3xl" />
+              <div className="pointer-events-none absolute -right-12 bottom-8 h-48 w-48 rounded-full bg-[#c7dafd]/40 blur-3xl" />
+              <div className="pointer-events-none absolute inset-6 rounded-[1.5rem] border border-white/80" />
+              <div className="pointer-events-none absolute inset-y-10 left-[24%] border-l border-dashed border-slate-300/80" />
+              <div className="pointer-events-none absolute inset-y-10 left-[32%] border-l border-dashed border-slate-300/80" />
+              <div className="pointer-events-none absolute inset-y-10 left-[40%] border-l border-dashed border-slate-300/80" />
+
+              <div className="relative min-h-[370px]">
+                <svg
+                  className="pointer-events-none absolute inset-0 h-full w-full"
+                  viewBox="0 0 1200 370"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M 666 94 C 732 92, 760 120, 794 146 C 826 169, 845 176, 888 172"
+                    stroke="#98a2b3"
+                    strokeWidth="2"
+                    strokeDasharray="3 7"
+                  />
+                  <path
+                    d="M 666 174 C 732 172, 760 187, 794 197 C 826 206, 845 205, 888 200"
+                    stroke="#98a2b3"
+                    strokeWidth="2"
+                    strokeDasharray="3 7"
+                  />
+                  <path
+                    d="M 666 254 C 732 255, 760 246, 794 226 C 826 207, 845 201, 888 204"
+                    stroke="#98a2b3"
+                    strokeWidth="2"
+                    strokeDasharray="3 7"
+                  />
+                </svg>
+
+                {features.slice(0, 3).map((feature, index) => {
+                  const laneStyle =
+                    featureFlowLaneStyles[index] || featureFlowLaneStyles[0];
+                  const topPosition = 88 + index * 80;
+
+                  return (
+                    <div
+                      key={feature.title}
+                      className={`absolute left-5 flex h-[44px] w-[57%] -translate-y-1/2 items-center justify-between rounded-full ${laneStyle.bar} px-4 shadow-sm ring-1 ring-black/5`}
+                      style={{ top: `${topPosition}px` }}
+                    >
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <span
+                          className={`h-5 w-5 shrink-0 rounded-full ${laneStyle.dot} border border-white/80`}
+                        />
+                        <span className="truncate text-sm font-medium text-slate-800">
+                          {feature.title}
+                        </span>
+                      </div>
+                      <span className="pl-4 text-sm font-semibold text-slate-500">
+                        +
+                      </span>
+                    </div>
+                  );
+                })}
+
+                <article className="absolute right-5 top-1/2 flex min-h-[360px] w-[36%] -translate-y-1/2 flex-col rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-[0_18px_36px_rgba(15,23,42,0.12)] backdrop-blur-sm">
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                      Project
+                    </h3>
+                    <span className="text-[11px] text-slate-400">03</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    {f.title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed text-sm mb-4">
-                    {f.desc}
-                  </p>
-                  <div className="flex items-center text-teal-600 font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Learn more <ArrowRight className="h-4 w-4 ml-2" />
+
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold text-white">
+                      FV
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-900">
+                        Feature Sprint
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {totalFeedbackTasks} tasks planned
+                      </p>
+                    </div>
                   </div>
-                </div>
+
+                  <div className="space-y-1.5">
+                    {feedbackPlanItems.map((item, index) => (
+                      <div key={item.title} className="flex items-start gap-2">
+                        <span className="mt-[5px] inline-block h-1.5 w-1.5 rounded-full bg-slate-400" />
+                        <p className="line-clamp-1 text-[11px] text-slate-600">
+                          <span className="font-semibold text-slate-800">
+                            {index + 1}. {item.title}
+                          </span>{" "}
+                          {item.detail}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 border-t border-slate-200 pt-3">
+                    <div className="mb-2.5 flex items-center justify-between text-[11px] font-semibold text-slate-500">
+                      <span>Execution Progress</span>
+                      <span>{feedbackExecutionProgress}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-200">
+                      <div
+                        className="h-1.5 rounded-full bg-gradient-to-r from-teal-500 to-blue-600"
+                        style={{ width: `${feedbackExecutionProgress}%` }}
+                      />
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[11px]">
+                      <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
+                        <p className="font-bold text-slate-900">
+                          {totalFeedbackTasks}
+                        </p>
+                        <p className="text-slate-500">Tasks</p>
+                      </div>
+                      <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
+                        <p className="font-bold text-slate-900">
+                          {completedFeedbackTasks}
+                        </p>
+                        <p className="text-slate-500">Done</p>
+                      </div>
+                      <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
+                        <p className="font-bold text-slate-900">
+                          {nextFeedbackTasks}
+                        </p>
+                        <p className="text-slate-500">Next</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex gap-2">
+                      <button className="rounded-md bg-slate-900 px-2.5 py-1.5 text-[11px] font-semibold text-white">
+                        Review Plan
+                      </button>
+                      <button className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700">
+                        Assign Team
+                      </button>
+                    </div>
+                  </div>
+                </article>
               </div>
+            </div>
+          </div>
+
+          <div
+            className="grid gap-4 sm:grid-cols-2 lg:hidden reveal-on-scroll"
+            data-reveal
+            data-delay="80"
+          >
+            {features.map((f, i) => (
+              <article
+                key={i}
+                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="inline-flex rounded-xl bg-gradient-to-br from-teal-100 to-blue-100 p-3 ring-1 ring-teal-200/70">
+                    <f.icon className="h-5 w-5 text-teal-600" />
+                  </div>
+                  <span className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] text-gray-400">
+                    {`0${i + 1}`}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                  {f.desc}
+                </p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50 border-t border-gray-200 relative overflow-hidden">
+      <section className="py-20 border-t border-gray-200/70 relative overflow-hidden">
         <div className="absolute top-20 left-10 w-72 h-72 bg-teal-100 rounded-full opacity-10 blur-3xl"></div>
         <div className="absolute bottom-10 right-10 w-72 h-72 bg-blue-100 rounded-full opacity-10 blur-3xl"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
+          <div className="text-center mb-20 reveal-on-scroll" data-reveal>
             <p className="text-teal-600 font-semibold text-sm uppercase mb-2 tracking-wide">
               Simple Process
             </p>
@@ -449,36 +787,41 @@ export default function Landing() {
               {[
                 {
                   num: "1",
-                  icon: Link2,
-                  title: "Connect",
-                  desc: "Link your review platforms",
+                  icon: User,
+                  title: "Create Account",
+                  desc: "Set up your business profile in minutes.",
                 },
                 {
                   num: "2",
-                  icon: Mail,
-                  title: "Collect",
-                  desc: "Automatically request reviews",
+                  icon: Link2,
+                  title: "Get QR Code",
+                  desc: "Generate a custom QR code for customer reviews.",
                 },
                 {
                   num: "3",
-                  icon: BarChart3,
-                  title: "Analyze",
-                  desc: "View detailed insights",
+                  icon: Smartphone,
+                  title: "Scan For Review",
+                  desc: "Let customers scan and submit feedback instantly.",
                 },
                 {
                   num: "4",
-                  icon: MessageCircle,
-                  title: "Respond",
-                  desc: "Manage all reviews in one place",
+                  icon: TrendingUp,
+                  title: "Grow With Feedback",
+                  desc: "Use insights to improve service and drive growth.",
                 },
               ].map((step, i) => (
-                <div key={i} className="relative group">
+                <div
+                  key={i}
+                  className="relative group reveal-on-scroll"
+                  data-reveal
+                  data-delay={100 + i * 80}
+                >
                   <div className="flex flex-col items-center text-center">
                     <div className="relative mb-6">
-                      <div className="w-28 h-28 bg-gradient-to-br from-teal-50 to-blue-50 border-3 border-teal-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
+                      <div className="w-28 h-28 bg-gradient-to-br from-white/45 to-white/20 backdrop-blur-sm border-3 border-teal-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
                         <step.icon className="w-12 h-12 text-teal-600" />
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white border-3 border-teal-600 rounded-full flex items-center justify-center font-bold text-teal-600 shadow-md">
+                      <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white/80 backdrop-blur-sm border-3 border-teal-600 rounded-full flex items-center justify-center font-bold text-teal-600 shadow-md">
                         {step.num}
                       </div>
                     </div>
@@ -497,60 +840,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Integrations */}
+      {/* Testimonials */}
       <section
-        id="integrations"
-        className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 border-t border-gray-200"
+        id="stories"
+        className="border-t border-gray-200/70 bg-white py-20"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <p className="text-teal-600 font-semibold text-sm uppercase mb-2 tracking-wide">
-              Integrations
-            </p>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Works with your favorite platforms
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Connect with 50+ review platforms and business tools.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
-            {integrations.map((platform, i) => (
-              <div key={i} className="group relative h-32">
-                <div className="absolute inset-0 bg-white border-2 border-gray-200 rounded-2xl group-hover:border-teal-500 group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1"></div>
-
-                <div className="relative h-full flex flex-col items-center justify-center p-4">
-                  <div className="mb-2 group-hover:scale-125 transition-transform duration-300">
-                    <platform.icon className="w-8 h-8 text-teal-600" />
-                  </div>
-                  <p className="font-semibold text-gray-900 text-xs text-center leading-tight group-hover:text-teal-600 transition-colors duration-300">
-                    {platform.name}
-                  </p>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-600 to-blue-600 rounded-b-xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-20 text-center">
-            <p className="text-gray-600 mb-6">
-              Need a different integration? We support custom connections too!
-            </p>
-            <Link to="/auth">
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white px-8">
-                View All Integrations
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 reveal-on-scroll" data-reveal>
             <p className="text-teal-600 font-semibold text-sm uppercase mb-2 tracking-wide">
               Success Stories
             </p>
@@ -558,66 +854,52 @@ export default function Landing() {
               Trusted by thousands of businesses
             </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Sarah Johnson",
-                role: "Restaurant Owner",
-                icon: Briefcase,
-                text: "ReviewMaster helped us increase Google rating from 3.2 to 4.8 in 3 months!",
-                rating: 5,
-              },
-              {
-                name: "Michael Chen",
-                role: "E-commerce Manager",
-                icon: Package,
-                text: "The automated review requests are a game-changer. We get 5x more reviews now.",
-                rating: 5,
-              },
-              {
-                name: "Emma Williams",
-                role: "Marketing Director",
-                icon: BarChart3,
-                text: "Best investment we made this year. The analytics alone are worth it.",
-                rating: 5,
-              },
-            ].map((testimonial, i) => (
-              <div
-                key={i}
-                className="p-8 bg-white rounded-2xl shadow-md hover:shadow-xl transition-all border border-gray-100"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-200 to-blue-200 flex items-center justify-center shadow-md">
-                    <testimonial.icon className="h-8 w-8 text-teal-700" />
+          <div
+            className="relative overflow-hidden reveal-on-scroll"
+            data-reveal
+            data-delay="70"
+          >
+            <div className="testimonial-marquee-track">
+              {[...testimonials, ...testimonials].map((testimonial, i) => (
+                <article
+                  key={`${testimonial.name}-${i}`}
+                  className="w-[340px] shrink-0 rounded-2xl border border-white/60 bg-white/60 p-7 shadow-md backdrop-blur-sm"
+                >
+                  <div className="mb-5 flex items-center gap-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-teal-200 to-blue-200 shadow-md">
+                      <testimonial.icon className="h-7 w-7 text-teal-700" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900">
+                        {testimonial.name}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {testimonial.role}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-gray-900">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  <div className="mb-3 flex gap-1">
+                    {[...Array(testimonial.rating)].map((_, j) => (
+                      <Star
+                        key={j}
+                        className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                      />
+                    ))}
                   </div>
-                </div>
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, j) => (
-                    <Star
-                      key={j}
-                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-                <p className="text-gray-700 italic leading-relaxed">
-                  "{testimonial.text}"
-                </p>
-              </div>
-            ))}
+                  <p className="text-gray-700 italic leading-relaxed">
+                    "{testimonial.text}"
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-20 bg-white border-t border-gray-200">
+      <section id="pricing" className="border-t border-gray-200/70 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 reveal-on-scroll" data-reveal>
             <p className="text-teal-600 font-semibold text-sm uppercase mb-2">
               Simple Pricing
             </p>
@@ -632,7 +914,9 @@ export default function Landing() {
             {pricingPlans.map((plan, i) => (
               <div
                 key={i}
-                className={`rounded-xl overflow-hidden transition-all ${plan.popular ? "ring-2 ring-teal-600 md:scale-105 md:shadow-2xl" : "border border-gray-200 shadow-md"} ${plan.popular ? "bg-gradient-to-br from-teal-50 to-blue-50" : "bg-white"}`}
+                className={`rounded-xl overflow-hidden transition-all reveal-on-scroll ${plan.popular ? "ring-2 ring-teal-600 md:scale-105 md:shadow-2xl" : "border border-gray-200 shadow-md"} ${plan.popular ? "bg-gradient-to-br from-teal-50 to-blue-50" : "bg-white"}`}
+                data-reveal
+                data-delay={90 + i * 90}
               >
                 {plan.popular && (
                   <div className="bg-gradient-to-r from-teal-600 to-blue-600 text-white text-xs font-bold px-4 py-2 text-center">
@@ -676,9 +960,9 @@ export default function Landing() {
       </section>
 
       {/* FAQ */}
-      <section className="py-20">
+      <section className="border-t border-gray-200/70 bg-white py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 reveal-on-scroll" data-reveal>
             <p className="text-teal-600 font-semibold text-sm uppercase mb-2">
               Have Questions?
             </p>
@@ -690,7 +974,9 @@ export default function Landing() {
             {faqs.map((faq, i) => (
               <details
                 key={i}
-                className="group border border-gray-300 rounded-lg p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="group border border-gray-300 rounded-lg p-6 hover:bg-gray-50 transition-colors cursor-pointer reveal-on-scroll"
+                data-reveal
+                data-delay={70 + i * 55}
               >
                 <summary className="flex justify-between items-center font-semibold text-gray-900 list-none">
                   {faq.q}
@@ -704,30 +990,25 @@ export default function Landing() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 bg-gradient-to-r from-teal-600 to-blue-600">
+      <section
+        className="py-20 bg-gradient-to-r from-teal-600 to-blue-600 reveal-on-scroll"
+        data-reveal
+      >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to master your reputation?
           </h2>
           <p className="text-xl text-teal-100 mb-10 max-w-2xl mx-auto">
-            Join thousands of successful businesses using ReviewMaster to grow
+            Join thousands of successful businesses using FeedbackView to grow
             their online reputation.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link to="/auth">
               <Button
                 size="lg"
                 className="bg-white text-teal-600 hover:bg-gray-100 px-8 text-base font-semibold"
               >
-                Start Your Free Trial
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button
-                size="lg"
-                className="border-2 border-white text-white hover:bg-white/10 px-8 text-base font-semibold"
-              >
-                Schedule a Demo
+                Get Started
               </Button>
             </Link>
           </div>
@@ -744,7 +1025,7 @@ export default function Landing() {
                   <BookmarkIcon className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-lg font-bold text-gray-900">
-                  ReviewMaster
+                  FeedbackView
                 </span>
               </div>
               <p className="text-gray-600 text-sm">
@@ -755,19 +1036,19 @@ export default function Landing() {
               <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <a href="#features" className="hover:text-teal-600">
+                  <Link to="/features" className="hover:text-teal-600">
                     Features
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#pricing" className="hover:text-teal-600">
+                  <Link to="/pricing" className="hover:text-teal-600">
                     Pricing
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#integrations" className="hover:text-teal-600">
-                    Integrations
-                  </a>
+                  <Link to="/success-stories" className="hover:text-teal-600">
+                    Success Stories
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -775,19 +1056,19 @@ export default function Landing() {
               <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <a href="#" className="hover:text-teal-600">
+                  <Link to="/about" className="hover:text-teal-600">
                     About
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-teal-600">
+                  <Link to="/blog" className="hover:text-teal-600">
                     Blog
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-teal-600">
+                  <Link to="/contact" className="hover:text-teal-600">
                     Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -795,25 +1076,25 @@ export default function Landing() {
               <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <a href="#" className="hover:text-teal-600">
+                  <Link to="/privacy" className="hover:text-teal-600">
                     Privacy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-teal-600">
+                  <Link to="/terms" className="hover:text-teal-600">
                     Terms
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-teal-600">
+                  <Link to="/security" className="hover:text-teal-600">
                     Security
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-200 pt-8 text-center text-sm text-gray-600">
-            © {new Date().getFullYear()} ReviewMaster. All rights reserved.
+            © {new Date().getFullYear()} FeedbackView. All rights reserved.
           </div>
         </div>
       </footer>
