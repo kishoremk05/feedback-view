@@ -43,7 +43,7 @@ const pageContentMap: Record<PageKey, PageContent> = {
       "Starter: great for small businesses getting started with feedback loops.",
       "Professional: unlimited requests, advanced insights, and priority support.",
       "Enterprise: custom integrations, API support, and account management.",
-      "14-day free trial with no credit card required.",
+      "All plans include transparent billing and easy upgrades as you scale.",
     ],
   },
   "success-stories": {

@@ -184,8 +184,8 @@ const faqs = [
     a: "Yes. We provide setup guidance, best-practice templates, and support to help your team launch quickly.",
   },
   {
-    q: "What is included in the free trial?",
-    a: "You get full access to Professional features for 14 days with no credit card required.",
+    q: "How do I choose the right plan?",
+    a: "Start with the plan that matches your current volume and team size. You can upgrade anytime as your business grows.",
   },
 ];
 
@@ -907,7 +907,8 @@ export default function Landing() {
               Plans that grow with you
             </h2>
             <p className="text-gray-600 text-lg">
-              All plans include a 14-day free trial. No credit card required.
+              Flexible monthly plans with transparent pricing and no hidden
+              fees.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ExternalLink, Star, Zap, CheckCircle } from "lucide-react";
+import { Star, Zap, CheckCircle } from "lucide-react";
 
 export default function ReviewPage() {
   const { businessId } = useParams<{ businessId: string }>();
@@ -155,27 +155,9 @@ export default function ReviewPage() {
               <p className="text-sm text-muted-foreground">
                 {redirectUrl
                   ? "Redirecting you to the review platform..."
-                  : "Choose a platform below:"}
+                  : "No review platform configured yet."}
               </p>
               <div className="space-y-2">
-                {reviewLinks.length > 0 ? (
-                  reviewLinks.map((link, i) => (
-                    <Button
-                      key={i}
-                      variant="outline"
-                      className="w-full justify-between"
-                      onClick={() => window.open(link.url, "_blank")}
-                    >
-                      {link.platform_name}
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No review platforms configured yet.
-                  </p>
-                )}
-
                 {redirectUrl && (
                   <Button
                     className="w-full"

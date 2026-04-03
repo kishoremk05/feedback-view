@@ -4,12 +4,31 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -76,6 +95,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [showBusinessQr, setShowBusinessQr] = useState(false);
+  const [feedbackPage, setFeedbackPage] = useState(1);
+  const [selectedFeedbackIds, setSelectedFeedbackIds] = useState<string[]>([]);
+  const [isDeletingFeedback, setIsDeletingFeedback] = useState(false);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
+  const [feedbackDeleteDialogOpen, setFeedbackDeleteDialogOpen] =
+    useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -145,6 +170,40 @@ export default function Dashboard() {
   }).length;
   const activeLinks = reviewLinks.length;
   const latestFeedback = feedbacks.slice(0, 8);
+  const feedbackPerPage = 2;
+  const feedbackPageCount = Math.max(
+    1,
+    Math.ceil(latestFeedback.length / feedbackPerPage),
+  );
+  const paginatedFeedback = latestFeedback.slice(
+    (feedbackPage - 1) * feedbackPerPage,
+    feedbackPage * feedbackPerPage,
+  );
+
+  useEffect(() => {
+    setFeedbackPage(1);
+  }, [latestFeedback.length]);
+
+  useEffect(() => {
+    if (feedbackPage > feedbackPageCount) {
+      setFeedbackPage(feedbackPageCount);
+    }
+  }, [feedbackPage, feedbackPageCount]);
+
+  useEffect(() => {
+    setSelectedFeedbackIds((prev) =>
+      prev.filter((id) => latestFeedback.some((feedback) => feedback.id === id)),
+    );
+  }, [latestFeedback]);
+
+  const selectedOnCurrentPageCount = paginatedFeedback.filter((feedback) =>
+    selectedFeedbackIds.includes(feedback.id),
+  ).length;
+  const allCurrentPageSelected =
+    paginatedFeedback.length > 0 &&
+    paginatedFeedback.every((feedback) =>
+      selectedFeedbackIds.includes(feedback.id),
+    );
 
   const now = new Date();
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -275,6 +334,65 @@ export default function Dashboard() {
     toast.success("Link removed");
   };
 
+  const deleteFeedback = async (ids: string[]) => {
+    if (!business || ids.length === 0) return;
+
+    setIsDeletingFeedback(true);
+    const { error } = await supabase
+      .from("feedback")
+      .delete()
+      .eq("business_id", business.id)
+      .in("id", ids);
+
+    if (error) {
+      toast.error("Failed to delete feedback");
+      setIsDeletingFeedback(false);
+      return;
+    }
+
+    setFeedbacks((prev) => prev.filter((feedback) => !ids.includes(feedback.id)));
+    setSelectedFeedbackIds((prev) => prev.filter((id) => !ids.includes(id)));
+    toast.success(ids.length === 1 ? "Comment deleted" : "Comments deleted");
+    setIsDeletingFeedback(false);
+  };
+
+  const toggleFeedbackSelection = (feedbackId: string, checked: boolean) => {
+    setSelectedFeedbackIds((prev) => {
+      if (checked) {
+        return prev.includes(feedbackId) ? prev : [...prev, feedbackId];
+      }
+
+      return prev.filter((id) => id !== feedbackId);
+    });
+  };
+
+  const toggleCurrentPageSelection = (checked: boolean) => {
+    const pageIds = paginatedFeedback.map((feedback) => feedback.id);
+
+    if (checked) {
+      setSelectedFeedbackIds((prev) => [
+        ...prev,
+        ...pageIds.filter((id) => !prev.includes(id)),
+      ]);
+      return;
+    }
+
+    setSelectedFeedbackIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+  };
+
+  const requestFeedbackDelete = (ids: string[]) => {
+    if (ids.length === 0 || isDeletingFeedback) return;
+    setPendingDeleteIds(ids);
+    setFeedbackDeleteDialogOpen(true);
+  };
+
+  const confirmFeedbackDelete = async () => {
+    if (pendingDeleteIds.length === 0) return;
+    await deleteFeedback(pendingDeleteIds);
+    setFeedbackDeleteDialogOpen(false);
+    setPendingDeleteIds([]);
+  };
+
   if (authLoading || loading) {
     return (
       <div
@@ -321,17 +439,10 @@ export default function Dashboard() {
         <div className="mx-auto max-w-7xl rounded-[2rem] border border-slate-300/80 bg-slate-100/90 px-4 py-3 shadow-sm backdrop-blur-md">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-blue-600 text-lg font-bold text-white shadow-sm">
-                GP
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  FeedbackView
-                </p>
-                <p className="text-sm font-semibold text-slate-700">
-                  Feedback Management Center
-                </p>
-              </div>
+              <BookmarkIcon className="h-7 w-7 text-slate-900" />
+              <p className="text-base font-bold tracking-tight text-slate-900 sm:text-2xl">
+                FeedbackView
+              </p>
             </div>
 
             <div className="ml-auto flex items-center gap-3">
@@ -548,11 +659,20 @@ export default function Dashboard() {
                   <div className="space-y-3">
                     <div className="flex justify-center rounded-xl border border-slate-200 bg-white/85 p-3">
                       {reviewUrl ? (
-                        <QRCodeSVG value={reviewUrl} size={112} />
+                        <QRCodeSVG id="qr-code" value={reviewUrl} size={112} />
                       ) : (
                         <p className="text-xs font-medium text-slate-500">No review link yet</p>
                       )}
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full border-slate-300 bg-white/85 text-slate-800 hover:bg-white"
+                      onClick={downloadQR}
+                      disabled={!reviewUrl}
+                    >
+                      <Download className="mr-1 h-4 w-4" /> Download QR
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -683,44 +803,171 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 gap-6">
                 <Card className="glass-card glass-card-hover border-2 border-slate-400/80">
                   <CardHeader>
-                    <CardTitle className="text-lg">Latest Feedback</CardTitle>
-                    <CardDescription>
-                      Most recent responses from your customers
-                    </CardDescription>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <CardTitle className="text-lg">Latest Feedback</CardTitle>
+                        <CardDescription>
+                          Most recent responses from your customers
+                        </CardDescription>
+                      </div>
+
+                      {latestFeedback.length > 0 && (
+                        <div className="flex items-center gap-2 self-start">
+                          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                            <Checkbox
+                              id="select-page-feedback"
+                              checked={
+                                allCurrentPageSelected
+                                  ? true
+                                  : selectedOnCurrentPageCount > 0
+                                    ? "indeterminate"
+                                    : false
+                              }
+                              onCheckedChange={(checked) =>
+                                toggleCurrentPageSelection(checked === true)
+                              }
+                              disabled={isDeletingFeedback}
+                            />
+                            <Label
+                              htmlFor="select-page-feedback"
+                              className="text-xs font-medium text-slate-600"
+                            >
+                              Select page
+                            </Label>
+                          </div>
+
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => requestFeedbackDelete(selectedFeedbackIds)}
+                            disabled={
+                              selectedFeedbackIds.length === 0 || isDeletingFeedback
+                            }
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete selected ({selectedFeedbackIds.length})
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </CardHeader>
-                  <CardContent className="max-h-[34rem] space-y-3 overflow-y-auto pr-1">
+                  <CardContent className="space-y-4">
                     {latestFeedback.length === 0 ? (
                       <div className="py-8 text-center text-slate-500">
                         <p>No feedback yet</p>
                       </div>
                     ) : (
-                      latestFeedback.map((fb) => (
-                        <div
-                          key={fb.id}
-                          className="rounded-xl border border-white/90 bg-white/85 p-4 shadow-sm backdrop-blur-sm"
-                        >
-                          <div className="mb-2 flex items-center justify-between">
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((value) => (
-                                <Star
-                                  key={value}
-                                  className={`h-4 w-4 ${
-                                    value <= fb.rating
-                                      ? "fill-amber-400 text-amber-400"
-                                      : "text-gray-300"
-                                  }`}
+                      <>
+                        {paginatedFeedback.map((fb) => (
+                          <article
+                            key={fb.id}
+                            className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/70 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                          >
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2">
+                                <Checkbox
+                                  checked={selectedFeedbackIds.includes(fb.id)}
+                                  onCheckedChange={(checked) =>
+                                    toggleFeedbackSelection(fb.id, checked === true)
+                                  }
+                                  disabled={isDeletingFeedback}
+                                  aria-label="Select comment"
                                 />
-                              ))}
+                                <div className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1">
+                                  <div className="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map((value) => (
+                                      <Star
+                                        key={value}
+                                        className={`h-4 w-4 ${
+                                          value <= fb.rating
+                                            ? "fill-amber-400 text-amber-400"
+                                            : "text-gray-300"
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <p className="shrink-0 text-xs font-medium text-slate-500">
+                                  {new Date(fb.created_at).toLocaleDateString()}
+                                </p>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
+                                  onClick={() => requestFeedbackDelete([fb.id])}
+                                  disabled={isDeletingFeedback}
+                                  aria-label="Delete comment"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                            <p className="text-xs text-slate-500">
-                              {new Date(fb.created_at).toLocaleDateString()}
+                            <p className="line-clamp-4 text-sm leading-relaxed text-slate-700">
+                              {fb.message || "No message"}
                             </p>
+                          </article>
+                        ))}
+
+                        {feedbackPageCount > 1 && (
+                          <div className="pt-1">
+                            <Pagination>
+                              <PaginationContent>
+                                <PaginationItem>
+                                  <PaginationPrevious
+                                    href="#"
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                      setFeedbackPage((prev) => Math.max(1, prev - 1));
+                                    }}
+                                    className={
+                                      feedbackPage === 1
+                                        ? "pointer-events-none opacity-50"
+                                        : ""
+                                    }
+                                  />
+                                </PaginationItem>
+
+                                {Array.from({ length: feedbackPageCount }, (_, idx) => {
+                                  const page = idx + 1;
+                                  return (
+                                    <PaginationItem key={page}>
+                                      <PaginationLink
+                                        href="#"
+                                        isActive={page === feedbackPage}
+                                        onClick={(event) => {
+                                          event.preventDefault();
+                                          setFeedbackPage(page);
+                                        }}
+                                      >
+                                        {page}
+                                      </PaginationLink>
+                                    </PaginationItem>
+                                  );
+                                })}
+
+                                <PaginationItem>
+                                  <PaginationNext
+                                    href="#"
+                                    onClick={(event) => {
+                                      event.preventDefault();
+                                      setFeedbackPage((prev) =>
+                                        Math.min(feedbackPageCount, prev + 1),
+                                      );
+                                    }}
+                                    className={
+                                      feedbackPage === feedbackPageCount
+                                        ? "pointer-events-none opacity-50"
+                                        : ""
+                                    }
+                                  />
+                                </PaginationItem>
+                              </PaginationContent>
+                            </Pagination>
                           </div>
-                          <p className="text-sm leading-relaxed text-slate-700">
-                            {fb.message || "No message"}
-                          </p>
-                        </div>
-                      ))
+                        )}
+                      </>
                     )}
                   </CardContent>
                 </Card>
@@ -963,17 +1210,6 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-center gap-3 rounded-lg border border-slate-200/90 bg-white/75 p-4">
-                    <p className="text-sm font-semibold text-gray-700">
-                      Download QR Code
-                    </p>
-                    {reviewUrl && (
-                      <QRCodeSVG id="qr-code" value={reviewUrl} size={150} />
-                    )}
-                    <Button variant="outline" size="sm" onClick={downloadQR}>
-                      <Download className="mr-1 h-4 w-4" /> Download QR
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
 
@@ -1047,6 +1283,54 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      <AlertDialog
+        open={feedbackDeleteDialogOpen}
+        onOpenChange={(open) => {
+          setFeedbackDeleteDialogOpen(open);
+          if (!open) {
+            setPendingDeleteIds([]);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingDeleteIds.length > 1
+                ? "Delete selected comments?"
+                : "Delete this comment?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingDeleteIds.length > 1
+                ? `This will permanently remove ${pendingDeleteIds.length} comments from Latest Feedback.`
+                : "This will permanently remove the selected comment from Latest Feedback."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingFeedback}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmFeedbackDelete}
+              disabled={isDeletingFeedback}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {isDeletingFeedback ? "Deleting..." : "Yes, delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+  );
+}
+
+function BookmarkIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M5 2h14a1 1 0 0 1 1 1v19l-8-5-8 5V3a1 1 0 0 1 1-1z" />
+    </svg>
   );
 }
