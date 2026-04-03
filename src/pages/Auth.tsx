@@ -54,7 +54,7 @@ export default function Auth() {
           <div className="flex items-center justify-center gap-2 mb-2">
             <Zap className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-foreground">
-              GrowthPilot
+              FeedbackView
             </span>
           </div>
           <CardTitle className="text-xl">

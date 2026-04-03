@@ -257,10 +257,10 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  GrowthPilot
+                  FeedbackView
                 </p>
                 <p className="text-sm font-semibold text-slate-700">
-                  Growth Command Center
+                  Feedback Management Center
                 </p>
               </div>
             </div>
@@ -330,7 +330,7 @@ export default function Dashboard() {
             <div className="relative grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.34em] text-blue-700">
-                  GrowthPilot
+                  FeedbackView
                 </p>
                 <h1 className="mt-2 text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">
                   {pageTitle}
