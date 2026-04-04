@@ -637,9 +637,12 @@ export default function Landing() {
                 </div>
 
                 {/* CTA Button */}
-                <button className="w-full bg-gradient-to-r from-teal-600 to-blue-600 text-white text-xs font-bold py-3 rounded-lg hover:shadow-lg transition-all">
+                <Link
+                  to="/auth"
+                  className="block w-full bg-gradient-to-r from-teal-600 to-blue-600 text-white text-xs font-bold py-3 rounded-lg hover:shadow-lg transition-all text-center"
+                >
                   → View Full Dashboard
-                </button>
+                </Link>
               </div>
             </div>
 
