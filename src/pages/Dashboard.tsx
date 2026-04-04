@@ -450,7 +450,7 @@ export default function Dashboard() {
         backgroundImage: `linear-gradient(rgba(248, 250, 252, 0.42), rgba(248, 250, 252, 0.56)), url(${dashboardBg})`,
       }}
     >
-      <header className="sticky top-0 z-30 bg-transparent px-4 pt-3 sm:px-6 lg:px-8">
+      <header className="fixed inset-x-0 top-0 z-30 bg-transparent px-4 pt-3 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl rounded-[2rem] border border-slate-300/80 bg-slate-100/90 px-4 py-3 shadow-sm backdrop-blur-md">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="flex items-center gap-3">
@@ -540,7 +540,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="px-4 pb-10 pt-5 sm:px-6 lg:px-8">
+      <main className="px-4 pb-10 pt-28 sm:px-6 sm:pt-32 lg:px-8">
         <div className="mx-auto max-w-7xl space-y-7">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_1fr]">
             <section className="relative overflow-hidden rounded-3xl border-2 border-slate-400/80 bg-gradient-to-br from-white/90 to-slate-50/80 px-6 py-6 shadow-sm backdrop-blur-md sm:px-8">

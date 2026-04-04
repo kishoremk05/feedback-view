@@ -307,7 +307,7 @@ export default function Landing() {
       }}
     >
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
+      <nav className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
         <div
           className={`mx-auto rounded-[2.2rem] border border-slate-300/80 bg-slate-100/90 px-4 shadow-sm backdrop-blur-md transition-[max-width,padding] duration-300 ease-out sm:px-6 ${
             isNavCompact ? "max-w-5xl py-2.5" : "max-w-7xl py-3"
@@ -446,7 +446,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+      <section className="max-w-7xl mx-auto px-4 pb-12 pt-28 sm:px-6 lg:px-8 md:pb-20 md:pt-32">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div
