@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -169,7 +169,7 @@ export default function Dashboard() {
     );
   }).length;
   const activeLinks = reviewLinks.length;
-  const latestFeedback = feedbacks.slice(0, 8);
+  const latestFeedback = useMemo(() => feedbacks.slice(0, 8), [feedbacks]);
   const feedbackPerPage = 2;
   const feedbackPageCount = Math.max(
     1,
@@ -192,7 +192,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     setSelectedFeedbackIds((prev) =>
-      prev.filter((id) => latestFeedback.some((feedback) => feedback.id === id)),
+      prev.filter((id) =>
+        latestFeedback.some((feedback) => feedback.id === id),
+      ),
     );
   }, [latestFeedback]);
 
@@ -208,7 +210,15 @@ export default function Dashboard() {
   const now = new Date();
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+  const previousMonthEnd = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
 
   const previousMonthFeedback = feedbacks.filter((item) => {
     const date = new Date(item.created_at);
@@ -221,7 +231,8 @@ export default function Dashboard() {
         ? 100
         : 0
       : Math.round(
-          ((feedbackThisMonth - previousMonthFeedback) / previousMonthFeedback) *
+          ((feedbackThisMonth - previousMonthFeedback) /
+            previousMonthFeedback) *
             100,
         );
 
@@ -350,7 +361,9 @@ export default function Dashboard() {
       return;
     }
 
-    setFeedbacks((prev) => prev.filter((feedback) => !ids.includes(feedback.id)));
+    setFeedbacks((prev) =>
+      prev.filter((feedback) => !ids.includes(feedback.id)),
+    );
     setSelectedFeedbackIds((prev) => prev.filter((id) => !ids.includes(id)));
     toast.success(ids.length === 1 ? "Comment deleted" : "Comments deleted");
     setIsDeletingFeedback(false);
@@ -377,7 +390,9 @@ export default function Dashboard() {
       return;
     }
 
-    setSelectedFeedbackIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+    setSelectedFeedbackIds((prev) =>
+      prev.filter((id) => !pageIds.includes(id)),
+    );
   };
 
   const requestFeedbackDelete = (ids: string[]) => {
@@ -445,47 +460,53 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
-              <nav className="flex items-center gap-1 rounded-xl border border-slate-300/80 bg-white/75 p-1 backdrop-blur-sm">
+            <div className="ml-auto flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+              <nav className="flex w-full items-center gap-1 overflow-x-auto rounded-xl border border-slate-300/80 bg-white/75 p-1 backdrop-blur-sm sm:w-auto">
                 <button
                   onClick={() => setActiveTab("dashboard")}
-                  className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
+                  className={`rounded-lg px-3 py-2 text-sm font-semibold transition sm:px-3.5 ${
                     activeTab === "dashboard"
                       ? "bg-teal-600 text-white shadow-sm"
                       : "text-slate-700 hover:bg-white hover:text-teal-700"
                   }`}
                 >
                   <span className="inline-flex items-center gap-2">
-                    <LayoutDashboard className="h-4 w-4" /> Dashboard
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span className="hidden sm:inline">Dashboard</span>
                   </span>
                 </button>
                 <button
                   onClick={() => setActiveTab("analytics")}
-                  className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
+                  className={`rounded-lg px-3 py-2 text-sm font-semibold transition sm:px-3.5 ${
                     activeTab === "analytics"
                       ? "bg-teal-600 text-white shadow-sm"
                       : "text-slate-700 hover:bg-white hover:text-teal-700"
                   }`}
                 >
                   <span className="inline-flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" /> Analytics
+                    <BarChart3 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Analytics</span>
                   </span>
                 </button>
                 <button
                   onClick={() => setActiveTab("configuration")}
-                  className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
+                  className={`rounded-lg px-3 py-2 text-sm font-semibold transition sm:px-3.5 ${
                     activeTab === "configuration"
                       ? "bg-teal-600 text-white shadow-sm"
                       : "text-slate-700 hover:bg-white hover:text-teal-700"
                   }`}
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Settings className="h-4 w-4" /> Configuration
+                    <Settings className="h-4 w-4" />
+                    <span className="hidden sm:inline">Configuration</span>
                   </span>
                 </button>
               </nav>
 
-              <div className="relative" ref={profileMenuRef}>
+              <div
+                className="relative self-end sm:self-auto"
+                ref={profileMenuRef}
+              >
                 <button
                   type="button"
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
@@ -569,7 +590,9 @@ export default function Dashboard() {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-100">
                         This Month
                       </p>
-                      <p className="mt-2 text-3xl font-bold">{feedbackThisMonth}</p>
+                      <p className="mt-2 text-3xl font-bold">
+                        {feedbackThisMonth}
+                      </p>
                     </div>
                   </div>
 
@@ -631,13 +654,17 @@ export default function Dashboard() {
                       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                         Links
                       </p>
-                      <p className="text-base font-bold text-slate-900">{activeLinks}</p>
+                      <p className="text-base font-bold text-slate-900">
+                        {activeLinks}
+                      </p>
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
                         Feedback
                       </p>
-                      <p className="text-base font-bold text-slate-900">{totalFeedback}</p>
+                      <p className="text-base font-bold text-slate-900">
+                        {totalFeedback}
+                      </p>
                     </div>
                   </>
                 )}
@@ -661,7 +688,9 @@ export default function Dashboard() {
                       {reviewUrl ? (
                         <QRCodeSVG id="qr-code" value={reviewUrl} size={112} />
                       ) : (
-                        <p className="text-xs font-medium text-slate-500">No review link yet</p>
+                        <p className="text-xs font-medium text-slate-500">
+                          No review link yet
+                        </p>
                       )}
                     </div>
                     <Button
@@ -805,14 +834,16 @@ export default function Dashboard() {
                   <CardHeader>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
-                        <CardTitle className="text-lg">Latest Feedback</CardTitle>
+                        <CardTitle className="text-lg">
+                          Latest Feedback
+                        </CardTitle>
                         <CardDescription>
                           Most recent responses from your customers
                         </CardDescription>
                       </div>
 
                       {latestFeedback.length > 0 && (
-                        <div className="flex items-center gap-2 self-start">
+                        <div className="flex flex-wrap items-center gap-2 self-start">
                           <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
                             <Checkbox
                               id="select-page-feedback"
@@ -839,9 +870,12 @@ export default function Dashboard() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => requestFeedbackDelete(selectedFeedbackIds)}
+                            onClick={() =>
+                              requestFeedbackDelete(selectedFeedbackIds)
+                            }
                             disabled={
-                              selectedFeedbackIds.length === 0 || isDeletingFeedback
+                              selectedFeedbackIds.length === 0 ||
+                              isDeletingFeedback
                             }
                           >
                             <Trash2 className="h-4 w-4" />
@@ -868,7 +902,10 @@ export default function Dashboard() {
                                 <Checkbox
                                   checked={selectedFeedbackIds.includes(fb.id)}
                                   onCheckedChange={(checked) =>
-                                    toggleFeedbackSelection(fb.id, checked === true)
+                                    toggleFeedbackSelection(
+                                      fb.id,
+                                      checked === true,
+                                    )
                                   }
                                   disabled={isDeletingFeedback}
                                   aria-label="Select comment"
@@ -919,7 +956,9 @@ export default function Dashboard() {
                                     href="#"
                                     onClick={(event) => {
                                       event.preventDefault();
-                                      setFeedbackPage((prev) => Math.max(1, prev - 1));
+                                      setFeedbackPage((prev) =>
+                                        Math.max(1, prev - 1),
+                                      );
                                     }}
                                     className={
                                       feedbackPage === 1
@@ -929,23 +968,26 @@ export default function Dashboard() {
                                   />
                                 </PaginationItem>
 
-                                {Array.from({ length: feedbackPageCount }, (_, idx) => {
-                                  const page = idx + 1;
-                                  return (
-                                    <PaginationItem key={page}>
-                                      <PaginationLink
-                                        href="#"
-                                        isActive={page === feedbackPage}
-                                        onClick={(event) => {
-                                          event.preventDefault();
-                                          setFeedbackPage(page);
-                                        }}
-                                      >
-                                        {page}
-                                      </PaginationLink>
-                                    </PaginationItem>
-                                  );
-                                })}
+                                {Array.from(
+                                  { length: feedbackPageCount },
+                                  (_, idx) => {
+                                    const page = idx + 1;
+                                    return (
+                                      <PaginationItem key={page}>
+                                        <PaginationLink
+                                          href="#"
+                                          isActive={page === feedbackPage}
+                                          onClick={(event) => {
+                                            event.preventDefault();
+                                            setFeedbackPage(page);
+                                          }}
+                                        >
+                                          {page}
+                                        </PaginationLink>
+                                      </PaginationItem>
+                                    );
+                                  },
+                                )}
 
                                 <PaginationItem>
                                   <PaginationNext
@@ -1032,7 +1074,9 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-baseline gap-2">
-                    <p className="text-5xl font-bold text-blue-700">1</p>
+                    <p className="text-4xl font-bold text-blue-700 sm:text-5xl">
+                      1
+                    </p>
                     <p className="text-lg text-gray-400">/ 10</p>
                   </div>
                   <div className="space-y-2.5">
@@ -1064,7 +1108,7 @@ export default function Dashboard() {
                   <CardTitle className="text-base">Active Channels</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-5xl font-bold text-blue-700">
+                  <p className="text-4xl font-bold text-blue-700 sm:text-5xl">
                     {activeLinks}
                   </p>
                   <div className="space-y-2.5">
@@ -1096,7 +1140,7 @@ export default function Dashboard() {
                   <CardTitle className="text-base">Reviews Collected</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-5xl font-bold text-blue-700">
+                  <p className="text-4xl font-bold text-blue-700 sm:text-5xl">
                     {totalFeedback}
                   </p>
                   <div className="space-y-2.5">
@@ -1209,7 +1253,6 @@ export default function Dashboard() {
                       </Button>
                     </div>
                   </div>
-
                 </CardContent>
               </Card>
 
@@ -1307,7 +1350,9 @@ export default function Dashboard() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingFeedback}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingFeedback}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmFeedbackDelete}
               disabled={isDeletingFeedback}

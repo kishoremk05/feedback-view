@@ -136,16 +136,20 @@ export default function InfoPage({ pageKey }: InfoPageProps) {
       }}
     >
       <div className="mx-auto max-w-4xl">
-        <div className="mb-8 flex items-center justify-between gap-4">
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
             {content.title}
           </h1>
           <Link to="/">
-            <Button variant="outline">Back to Home</Button>
+            <Button variant="outline" className="w-full sm:w-auto">
+              Back to Home
+            </Button>
           </Link>
         </div>
 
-        <p className="mb-8 text-lg text-slate-600">{content.subtitle}</p>
+        <p className="mb-8 text-base text-slate-600 sm:text-lg">
+          {content.subtitle}
+        </p>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <ul className="space-y-4">

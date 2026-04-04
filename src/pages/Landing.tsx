@@ -20,6 +20,8 @@ import {
   User,
   Briefcase,
   Zap as ZapIcon,
+  Menu,
+  X,
 } from "lucide-react";
 import dashboardBg from "@/assets/bg.png";
 
@@ -230,6 +232,7 @@ const featureFlowLaneStyles = [
 
 export default function Landing() {
   const [isNavCompact, setIsNavCompact] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const totalFeedbackTasks = feedbackPlanItems.length;
   const completedFeedbackTasks = feedbackPlanItems.filter(
@@ -298,7 +301,7 @@ export default function Landing() {
 
   return (
     <div
-      className="min-h-screen bg-fixed bg-cover bg-center bg-no-repeat"
+      className="min-h-screen overflow-x-hidden bg-fixed bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: `linear-gradient(rgba(248, 250, 252, 0.42), rgba(248, 250, 252, 0.56)), url(${dashboardBg})`,
       }}
@@ -310,13 +313,27 @@ export default function Landing() {
             isNavCompact ? "max-w-5xl py-2.5" : "max-w-7xl py-3"
           }`}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-2.5 shrink-0">
               <BookmarkIcon className="h-6 w-6 text-slate-900" />
-              <span className="text-2xl font-bold text-slate-900">
+              <span className="text-xl font-bold text-slate-900 sm:text-2xl">
                 FeedbackView
               </span>
             </div>
+
+            <button
+              type="button"
+              className="ml-auto inline-flex items-center justify-center rounded-xl border border-slate-300/80 bg-white/80 p-2 text-slate-700 md:hidden"
+              onClick={() => setIsMobileNavOpen((prev) => !prev)}
+              aria-label="Toggle navigation"
+              aria-expanded={isMobileNavOpen}
+            >
+              {isMobileNavOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
 
             <div className="hidden flex-1 items-center justify-center gap-8 md:flex">
               <a
@@ -345,7 +362,7 @@ export default function Landing() {
               </a>
             </div>
 
-            <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <div className="ml-auto hidden items-center gap-2 sm:gap-3 md:flex">
               <Link
                 to="/auth"
                 className="hidden text-base font-semibold text-slate-700 transition-colors hover:text-slate-950 sm:inline"
@@ -362,6 +379,69 @@ export default function Landing() {
               </Link>
             </div>
           </div>
+
+          {isMobileNavOpen && (
+            <div className="mt-3 space-y-3 border-t border-slate-300/80 pt-3 md:hidden">
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href="#features"
+                  className="rounded-lg border border-slate-300/80 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700"
+                  onClick={() => setIsMobileNavOpen(false)}
+                >
+                  Features
+                </a>
+                <a
+                  href="#pricing"
+                  className="rounded-lg border border-slate-300/80 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700"
+                  onClick={() => setIsMobileNavOpen(false)}
+                >
+                  Pricing
+                </a>
+                <a
+                  href="#stories"
+                  className="rounded-lg border border-slate-300/80 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700"
+                  onClick={() => setIsMobileNavOpen(false)}
+                >
+                  Success
+                </a>
+                <a
+                  href="#resources"
+                  className="rounded-lg border border-slate-300/80 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700"
+                  onClick={() => setIsMobileNavOpen(false)}
+                >
+                  Resources
+                </a>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/auth"
+                  className="flex-1"
+                  onClick={() => setIsMobileNavOpen(false)}
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full rounded-xl border-slate-300 bg-white/85"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link
+                  to="/auth"
+                  className="flex-1"
+                  onClick={() => setIsMobileNavOpen(false)}
+                >
+                  <Button
+                    size="sm"
+                    className="w-full rounded-xl bg-[#238f93] text-white hover:bg-[#1e7e82]"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -375,7 +455,7 @@ export default function Landing() {
             data-delay="60"
           >
             <div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4">
                 Master Your Business Reputation. Turn Customer{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-blue-600">
                   Feedback into Growth.
@@ -863,7 +943,7 @@ export default function Landing() {
               {[...testimonials, ...testimonials].map((testimonial, i) => (
                 <article
                   key={`${testimonial.name}-${i}`}
-                  className="w-[340px] shrink-0 rounded-2xl border border-white/60 bg-white/60 p-7 shadow-md backdrop-blur-sm"
+                  className="w-full max-w-[340px] shrink-0 rounded-2xl border border-white/60 bg-white/60 p-7 shadow-md backdrop-blur-sm"
                 >
                   <div className="mb-5 flex items-center gap-4">
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-teal-200 to-blue-200 shadow-md">
@@ -991,23 +1071,20 @@ export default function Landing() {
       </section>
 
       {/* Final CTA */}
-      <section
-        className="py-20 bg-gradient-to-r from-teal-600 to-blue-600 reveal-on-scroll"
-        data-reveal
-      >
+      <section className="py-14 sm:py-20 reveal-on-scroll" data-reveal>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl leading-tight font-bold text-gray-900 mb-4 sm:mb-6">
             Ready to master your reputation?
           </h2>
-          <p className="text-xl text-teal-100 mb-10 max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-gray-600 mb-8 sm:mb-10 max-w-2xl mx-auto">
             Join thousands of successful businesses using FeedbackView to grow
             their online reputation.
           </p>
           <div className="flex justify-center">
-            <Link to="/auth">
+            <Link to="/auth" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="bg-white text-teal-600 hover:bg-gray-100 px-8 text-base font-semibold"
+                className="w-full sm:w-auto bg-teal-600 text-white hover:bg-teal-700 px-8 text-base font-semibold"
               >
                 Get Started
               </Button>
