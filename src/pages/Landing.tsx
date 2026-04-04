@@ -156,6 +156,39 @@ const pricingPlans = [
   },
 ];
 
+const playbooks = [
+  {
+    icon: Mail,
+    title: "First 50 Reviews Sprint",
+    desc: "A 14-day launch sequence to collect high-quality feedback from your happiest customers.",
+    points: [
+      "Day-by-day outreach schedule",
+      "Ready-to-send email and WhatsApp copy",
+      "Smart follow-up cadence after no response",
+    ],
+  },
+  {
+    icon: Link2,
+    title: "Multi-Channel Capture Flow",
+    desc: "Distribute review requests through links, QR, and checkout touchpoints without overwhelming customers.",
+    points: [
+      "Best placement for review links",
+      "QR prompts for in-store teams",
+      "Channel mix based on business type",
+    ],
+  },
+  {
+    icon: MessageCircle,
+    title: "Negative Feedback Recovery",
+    desc: "Turn low ratings into resolved conversations with a clear triage and response framework.",
+    points: [
+      "1-hour response template for urgent issues",
+      "Escalation matrix for support teams",
+      "Resolution playbook before public follow-up",
+    ],
+  },
+];
+
 const faqs = [
   {
     q: "How long does setup take?",
@@ -355,10 +388,10 @@ export default function Landing() {
                 Success
               </a>
               <a
-                href="#resources"
+                href="#playbooks"
                 className="text-base font-semibold text-slate-700 transition-colors hover:text-slate-950"
               >
-                Resources
+                Playbooks
               </a>
             </div>
 
@@ -405,11 +438,11 @@ export default function Landing() {
                   Success
                 </a>
                 <a
-                  href="#resources"
+                  href="#playbooks"
                   className="rounded-lg border border-slate-300/80 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700"
                   onClick={() => setIsMobileNavOpen(false)}
                 >
-                  Resources
+                  Playbooks
                 </a>
               </div>
 
@@ -1043,6 +1076,60 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Playbooks */}
+      <section
+        id="playbooks"
+        className="border-t border-gray-200/70 bg-gradient-to-b from-white to-teal-50/50 py-20"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-14 text-center reveal-on-scroll" data-reveal>
+            <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-teal-600">
+              Practical Playbooks
+            </p>
+            <h2 className="mb-4 text-4xl font-bold text-gray-900 md:text-5xl">
+              Copy, launch, and scale your review engine
+            </h2>
+            <p className="mx-auto max-w-3xl text-lg text-gray-600">
+              Plug-and-play frameworks your team can execute this week to
+              increase review volume, protect brand trust, and improve local
+              rankings.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {playbooks.map((playbook, i) => (
+              <article
+                key={playbook.title}
+                className="rounded-2xl border border-teal-100 bg-white p-7 shadow-sm transition-all reveal-on-scroll hover:-translate-y-1 hover:shadow-xl"
+                data-reveal
+                data-delay={80 + i * 70}
+              >
+                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-100 to-blue-100">
+                  <playbook.icon className="h-6 w-6 text-teal-700" />
+                </div>
+                <h3 className="mb-2 text-2xl font-bold text-gray-900">
+                  {playbook.title}
+                </h3>
+                <p className="mb-5 text-sm leading-relaxed text-gray-600">
+                  {playbook.desc}
+                </p>
+                <ul className="space-y-3">
+                  {playbook.points.map((point) => (
+                    <li
+                      key={point}
+                      className="flex items-start gap-2 text-sm text-gray-700"
+                    >
+                      <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-teal-600" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section className="border-t border-gray-200/70 bg-white py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1097,85 +1184,111 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="h-8 w-8 bg-gradient-to-br from-teal-600 to-blue-600 rounded-lg flex items-center justify-center">
-                  <BookmarkIcon className="h-5 w-5 text-white" />
+      <footer className="border-t border-slate-200/70 bg-slate-200/70 py-10 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[2rem] border border-slate-300/70 bg-slate-100/95 px-6 py-8 shadow-sm sm:px-10 sm:py-10">
+            <div className="grid gap-10 md:grid-cols-[1.3fr_0.9fr_0.9fr]">
+              <div>
+                <div className="mb-4 flex items-center gap-3">
+                  <BookmarkIcon className="h-7 w-7 text-slate-900" />
+                  <span className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                    FeedbackView
+                  </span>
                 </div>
-                <span className="text-lg font-bold text-gray-900">
-                  FeedbackView
-                </span>
+                <p className="max-w-sm text-xl leading-relaxed text-slate-700 sm:text-2xl">
+                  Manage your online reputation with ease.
+                </p>
               </div>
-              <p className="text-gray-600 text-sm">
-                Manage your online reputation with ease.
+
+              <div>
+                <h4 className="mb-4 text-sm font-bold uppercase tracking-wide text-slate-900">
+                  Product
+                </h4>
+                <ul className="space-y-3 text-2xl text-slate-700 sm:text-[2rem]">
+                  <li>
+                    <Link
+                      to="/features"
+                      className="transition-colors hover:text-slate-950"
+                    >
+                      Features
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/pricing"
+                      className="transition-colors hover:text-slate-950"
+                    >
+                      Pricing
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/success-stories"
+                      className="transition-colors hover:text-slate-950"
+                    >
+                      Success Stories
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/blog"
+                      className="transition-colors hover:text-slate-950"
+                    >
+                      Blog
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="mb-4 text-sm font-bold uppercase tracking-wide text-slate-900">
+                  Information
+                </h4>
+                <ul className="space-y-3 text-2xl text-slate-700 sm:text-[2rem]">
+                  <li>
+                    <Link
+                      to="/contact"
+                      className="transition-colors hover:text-slate-950"
+                    >
+                      Contact
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/privacy"
+                      className="transition-colors hover:text-slate-950"
+                    >
+                      Privacy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/terms"
+                      className="transition-colors hover:text-slate-950"
+                    >
+                      Terms
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/security"
+                      className="transition-colors hover:text-slate-950"
+                    >
+                      Security
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="my-8 border-t border-slate-300/80" />
+
+            <div className="flex flex-col gap-3 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+              <p>
+                © {new Date().getFullYear()} FeedbackView. All rights reserved.
               </p>
+              <p>Built for modern businesses.</p>
             </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>
-                  <Link to="/features" className="hover:text-teal-600">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/pricing" className="hover:text-teal-600">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/success-stories" className="hover:text-teal-600">
-                    Success Stories
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>
-                  <Link to="/about" className="hover:text-teal-600">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/blog" className="hover:text-teal-600">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="hover:text-teal-600">
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>
-                  <Link to="/privacy" className="hover:text-teal-600">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/terms" className="hover:text-teal-600">
-                    Terms
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/security" className="hover:text-teal-600">
-                    Security
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-200 pt-8 text-center text-sm text-gray-600">
-            © {new Date().getFullYear()} FeedbackView. All rights reserved.
           </div>
         </div>
       </footer>
