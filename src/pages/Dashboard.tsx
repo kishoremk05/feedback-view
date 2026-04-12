@@ -445,13 +445,13 @@ export default function Dashboard() {
 
   return (
     <div
-      className="min-h-screen bg-fixed bg-cover bg-center bg-no-repeat text-slate-950"
+      className="min-h-screen overflow-x-clip bg-fixed bg-cover bg-center bg-no-repeat text-slate-950"
       style={{
         backgroundImage: `linear-gradient(rgba(248, 250, 252, 0.42), rgba(248, 250, 252, 0.56)), url(${dashboardBg})`,
       }}
     >
-      <header className="fixed inset-x-0 top-0 z-30 bg-transparent px-4 pt-3 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl rounded-[2rem] border border-slate-300/80 bg-slate-100/90 px-4 py-3 shadow-sm backdrop-blur-md">
+      <header className="sticky inset-x-0 top-0 z-30 bg-transparent px-3 pt-3 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl rounded-[1.7rem] border border-slate-300/80 bg-slate-100/90 px-3 py-3 shadow-sm backdrop-blur-md sm:rounded-[2rem] sm:px-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="flex items-center gap-3">
               <BookmarkIcon className="h-7 w-7 text-slate-900" />
@@ -460,8 +460,8 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="ml-auto flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-              <nav className="flex w-full items-center gap-1 overflow-x-auto rounded-xl border border-slate-300/80 bg-white/75 p-1 backdrop-blur-sm sm:w-auto">
+            <div className="ml-auto flex w-full items-center gap-2 sm:w-auto sm:flex-row sm:items-center">
+              <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-xl border border-slate-300/80 bg-white/75 p-1 backdrop-blur-sm sm:w-auto sm:flex-none">
                 <button
                   onClick={() => setActiveTab("dashboard")}
                   className={`rounded-lg px-3 py-2 text-sm font-semibold transition sm:px-3.5 ${
@@ -503,10 +503,7 @@ export default function Dashboard() {
                 </button>
               </nav>
 
-              <div
-                className="relative self-end sm:self-auto"
-                ref={profileMenuRef}
-              >
+              <div className="relative shrink-0" ref={profileMenuRef}>
                 <button
                   type="button"
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
@@ -540,24 +537,24 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="px-4 pb-10 pt-28 sm:px-6 sm:pt-32 lg:px-8">
+      <main className="px-3 pb-10 pt-6 sm:px-6 sm:pt-8 lg:px-8">
         <div className="mx-auto max-w-7xl space-y-7">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[3fr_1fr]">
-            <section className="relative overflow-hidden rounded-3xl border-2 border-slate-400/80 bg-gradient-to-br from-white/90 to-slate-50/80 px-6 py-6 shadow-sm backdrop-blur-md sm:px-8">
+            <section className="relative overflow-hidden rounded-3xl border-2 border-slate-400/80 bg-gradient-to-br from-white/90 to-slate-50/80 px-4 py-5 shadow-sm backdrop-blur-md sm:px-8 sm:py-6">
               <div className="relative grid gap-8 lg:grid-cols-[1.15fr_1fr] lg:items-start">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.34em] text-blue-700">
                     FeedbackView
                   </p>
-                  <h1 className="mt-2 text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">
+                  <h1 className="mt-2 text-3xl font-bold leading-tight text-slate-950 sm:text-5xl">
                     {pageTitle}
                   </h1>
-                  <p className="mt-3 max-w-xl text-lg text-slate-600">
+                  <p className="mt-3 max-w-xl text-base text-slate-600 sm:text-lg">
                     {pageDescription}
                   </p>
-                  <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-teal-300 bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-800">
+                  <div className="mt-6 inline-flex max-w-full items-center gap-2 rounded-full border border-teal-300 bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-800">
                     <span className="h-2 w-2 rounded-full bg-teal-600" />
-                    {dateRangeLabel}
+                    <span className="truncate">{dateRangeLabel}</span>
                   </div>
 
                   <div className="mt-4 max-w-xl rounded-xl border border-slate-300/80 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-sm">
@@ -897,7 +894,7 @@ export default function Dashboard() {
                             key={fb.id}
                             className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/70 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                           >
-                            <div className="mb-3 flex items-center justify-between gap-3">
+                            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
                                 <Checkbox
                                   checked={selectedFeedbackIds.includes(fb.id)}
@@ -925,7 +922,7 @@ export default function Dashboard() {
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="ml-auto flex items-center gap-2">
                                 <p className="shrink-0 text-xs font-medium text-slate-500">
                                   {new Date(fb.created_at).toLocaleDateString()}
                                 </p>
@@ -1242,13 +1239,18 @@ export default function Dashboard() {
 
                   <div className="space-y-2">
                     <Label>Review Link</Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <Input
                         value={reviewUrl}
                         readOnly
                         className="border-slate-200 bg-white/85"
                       />
-                      <Button variant="outline" size="icon" onClick={copyLink}>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={copyLink}
+                        className="self-start sm:self-auto"
+                      >
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
