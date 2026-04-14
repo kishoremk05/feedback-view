@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,30 +13,61 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Zap } from "lucide-react";
 import dashboardBg from "@/assets/bg.png";
-
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const authMode = searchParams.get("mode");
+  const [isLogin, setIsLogin] = useState(() => authMode !== "signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [turnstileRenderKey, setTurnstileRenderKey] = useState(0);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    setTurnstileRenderKey((prev) => prev + 1);
+  };
+  useEffect(() => {
+    if (authMode === "signup") {
+      setIsLogin(false);
+      return;
+    }
+
+    if (authMode === "signin") {
+      setIsLogin(true);
+    }
+  }, [authMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!turnstileSiteKey) {
+      toast.error("Captcha is not configured. Add VITE_TURNSTILE_SITE_KEY.");
+      return;
+    }
+
+    if (!captchaToken) {
+      toast.error("Please complete the captcha challenge.");
+      return;
+    }
+
     setLoading(true);
 
     if (isLogin) {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(email, password, captchaToken);
       if (error) {
         toast.error(error.message);
       } else {
         navigate("/dashboard");
       }
     } else {
-      const { error } = await signUp(email, password);
+      const { error } = await signUp(email, password, captchaToken);
       if (error) {
         toast.error(error.message);
       } else {
@@ -45,6 +77,8 @@ export default function Auth() {
         setIsLogin(true);
       }
     }
+
+    resetCaptcha();
     setLoading(false);
   };
 
@@ -100,20 +134,69 @@ export default function Auth() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-2 inline-flex items-center text-slate-500 transition-colors hover:text-slate-800"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Security Check</Label>
+              {turnstileSiteKey ? (
+                <Turnstile
+                  key={turnstileRenderKey}
+                  siteKey={turnstileSiteKey}
+                  onSuccess={(token) => {
+                    setCaptchaToken(token);
+                  }}
+                  onExpire={() => {
+                    setCaptchaToken(null);
+                  }}
+                  onError={() => {
+                    setCaptchaToken(null);
+                    toast.error(
+                      "Captcha verification failed. Please try again.",
+                    );
+                  }}
+                  options={{
+                    theme: "light",
+                    size: "normal",
+                    appearance: "always",
+                    retry: "auto",
+                    execution: "render",
+                    action: isLogin ? "signin" : "signup",
+                  }}
+                />
+              ) : (
+                <p className="text-sm text-red-600">
+                  Captcha not configured. Set VITE_TURNSTILE_SITE_KEY to enable
+                  authentication.
+                </p>
+              )}
             </div>
             <Button
               type="submit"
               className="w-full rounded-xl bg-teal-600 text-white hover:bg-teal-700"
-              disabled={loading}
+              disabled={loading || !captchaToken || !turnstileSiteKey}
             >
               {loading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
             </Button>
@@ -121,7 +204,10 @@ export default function Auth() {
           <div className="mt-4 text-center text-sm text-muted-foreground">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                resetCaptcha();
+              }}
               className="text-primary font-medium hover:underline"
             >
               {isLogin ? "Sign up" : "Sign in"}

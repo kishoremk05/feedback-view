@@ -402,7 +402,7 @@ export default function Landing() {
               >
                 Login
               </Link>
-              <Link to="/auth">
+              <Link to="/auth?mode=signup">
                 <Button
                   size="sm"
                   className="rounded-2xl border-2 border-white bg-[#238f93] px-7 py-2 text-sm font-bold text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.55)] transition-all hover:bg-[#1e7e82] sm:px-9"
@@ -448,7 +448,7 @@ export default function Landing() {
 
               <div className="flex items-center gap-2">
                 <Link
-                  to="/auth"
+                  to="/auth?mode=signup"
                   className="flex-1"
                   onClick={() => setIsMobileNavOpen(false)}
                 >

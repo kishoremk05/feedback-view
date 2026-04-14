@@ -12,6 +12,24 @@ It helps businesses collect private feedback, route happy customers to public re
 - Authenticated admin panel for users and recent feedback monitoring
 - Supabase-backed data and authentication
 
+## Feature Inventory
+
+### Working / Completed
+
+- Public landing page with responsive navigation and CTAs
+- Email/password authentication (sign in + sign up)
+- Business dashboard with KPIs, analytics chart, feedback table, review link tools, and QR generation
+- Public review capture flow at `/review/:businessId`
+- Admin page with authenticated access
+- Supabase-backed persistence for businesses, feedback, and review links
+
+### Placeholder / Marketing-only (not yet implemented end-to-end)
+
+- AI-powered smart response assistant
+- Reputation protection alerting workflows
+- Native integrations with Google/Yelp/Facebook/Trustpilot and other external platform APIs
+- Advanced role management and deeper analytics expansion called out in roadmap/status text
+
 ## Tech Stack
 
 - Frontend: React 18, TypeScript, Vite
@@ -46,9 +64,34 @@ Create a `.env` file in the project root:
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_or_publishable_key
+VITE_MERCHANT_SESSION_TTL_HOURS=6
+VITE_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 ```
 
 These are required by `src/integrations/supabase/client.ts`.
+`VITE_MERCHANT_SESSION_TTL_HOURS` is optional and defaults to `6`.
+
+## Turnstile Edge Function Setup
+
+Server-side captcha verification is implemented in the Edge Function at `supabase/functions/verify-turnstile/index.ts`.
+
+1. Set the Turnstile secret in Supabase:
+
+```bash
+supabase secrets set TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
+```
+
+2. Deploy the function:
+
+```bash
+supabase functions deploy verify-turnstile
+```
+
+3. Ensure your frontend uses the matching site key in `.env`:
+
+```env
+VITE_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
+```
 
 ## Getting Started
 
